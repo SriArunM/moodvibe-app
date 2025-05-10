@@ -1,4 +1,4 @@
-# moodvibe-app
+# Moodvibe-App
 To analyse the sentiment/mood of the social media post
 
 # Dataset:
