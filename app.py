@@ -24,8 +24,7 @@ def download_model_from_drive():
         except Exception as e:
             st.error(f"Failed to download model: {str(e)}")
             raise
-    else:
-        st.info("Model files already exist.")
+    
 
 # Call download function and ensure it completes before loading
 download_model_from_drive()
