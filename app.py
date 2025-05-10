@@ -10,44 +10,62 @@ model_path = "./stress_model"
 drive_folder_id = "1KpwcYgQcNxwns6sMyl5bBzIGtZtE0kH5"
 
 def download_model_from_drive():
-    if not os.path.exists(model_path):
+    if not os.path.exists(model_path) or not all(
+        os.path.exists(os.path.join(model_path, f)) 
+        for f in ["label_encoder.pkl", "tokenizer_config.json", "model.safetensors"]
+    ):
         os.makedirs(model_path, exist_ok=True)
-        print("Downloading model files from Google Drive...")
-        gdown.download_folder(id=drive_folder_id, output=model_path, quiet=False, use_cookies=False)
-        print("Model downloaded.")
+        st.info("Downloading model files from Google Drive...")
+        try:
+            gdown.download_folder(id=drive_folder_id, output=model_path, quiet=False, use_cookies=False)
+            st.success("Model downloaded successfully.")
+        except Exception as e:
+            st.error(f"Failed to download model: {str(e)}")
+            raise
+    else:
+        st.info("Model files already exist.")
 
+# Call download function and ensure it completes before loading
 download_model_from_drive()
 
 st.set_page_config(page_title="MoodVibe", page_icon="😊", layout="wide")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-
 @st.cache_resource
 def load_label_encoder():
-    with open(f"{model_path}/label_encoder.pkl", "rb") as f:
-        return pickle.load(f)
-
+    try:
+        with open(f"{model_path}/label_encoder.pkl", "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        st.error("Label encoder file not found. Ensure model files are correctly downloaded.")
+        raise
 
 @st.cache_resource
 def load_tokenizer():
-    return BertTokenizer.from_pretrained(model_path, local_files_only=True)
-
+    try:
+        return BertTokenizer.from_pretrained(model_path, local_files_only=True)
+    except Exception as e:
+        st.error(f"Failed to load tokenizer: {str(e)}")
+        raise
 
 @st.cache_resource
 def load_model():
-    model = BertForSequenceClassification.from_pretrained(
-        model_path, local_files_only=True
-    )
-    model.to(device)
-    model.eval()
-    return model
+    try:
+        model = BertForSequenceClassification.from_pretrained(model_path, local_files_only=True)
+        model.to(device)
+        model.eval()
+        return model
+    except Exception as e:
+        st.error(f"Failed to load model: {str(e)}")
+        raise
 
-
+# Load resources only after download is confirmed
 label_encoder = load_label_encoder()
 tokenizer = load_tokenizer()
 model = load_model()
+
+# Rest of your code (predict_sentiment, UI, etc.) remains unchanged
 
 
 def predict_sentiment(post, max_length=128):
