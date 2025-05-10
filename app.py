@@ -6,6 +6,8 @@ import numpy as np
 import os
 import gdown
 
+st.set_page_config(page_title="MoodVibe", page_icon="😊", layout="wide")
+
 model_path = "./stress_model"
 drive_folder_id = "1KpwcYgQcNxwns6sMyl5bBzIGtZtE0kH5"
 
@@ -28,7 +30,7 @@ def download_model_from_drive():
 # Call download function and ensure it completes before loading
 download_model_from_drive()
 
-st.set_page_config(page_title="MoodVibe", page_icon="😊", layout="wide")
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
