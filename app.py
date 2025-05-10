@@ -3,11 +3,25 @@ import torch
 from transformers import BertTokenizer, BertForSequenceClassification
 import pickle
 import numpy as np
+import os
+import gdown
+
+model_path = "./stress_model"
+drive_folder_id = "1KpwcYgQcNxwns6sMyl5bBzIGtZtE0kH5"
+
+def download_model_from_drive():
+    if not os.path.exists(model_path):
+        os.makedirs(model_path, exist_ok=True)
+        print("Downloading model files from Google Drive...")
+        gdown.download_folder(id=drive_folder_id, output=model_path, quiet=False, use_cookies=False)
+        print("Model downloaded.")
+
+download_model_from_drive()
 
 st.set_page_config(page_title="MoodVibe", page_icon="😊", layout="wide")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_path = "./stress_model"
+
 
 
 @st.cache_resource
